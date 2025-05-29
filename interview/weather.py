@@ -6,7 +6,8 @@ def process_events(events: Iterable[dict[str, Any]]) -> Generator[dict[str, Any]
     stations = {}
     latest_timestamp = None
     for line in events:
-        if line.get("type") == "sample":
+        msg_type = line.get("type")
+        if msg_type == "sample":
             station = line["stationName"]
             temp = line["temperature"]
             ts = line["timestamp"]
@@ -23,4 +24,24 @@ def process_events(events: Iterable[dict[str, Any]]) -> Generator[dict[str, Any]
 
             # For now, yield the sample message for testability
             yield line
-        # Ignore other message types for now
+        elif msg_type == "control":
+            command = line.get("command")
+            if command == "snapshot":
+                if stations and latest_timestamp is not None:
+                    yield {
+                        "type": "snapshot",
+                        "asOf": latest_timestamp,
+                        "stations": stations.copy(),
+                    }
+            elif command == "reset":
+                if stations and latest_timestamp is not None:
+                    yield {
+                        "type": "reset",
+                        "asOf": latest_timestamp,
+                    }
+                    stations.clear()
+                    latest_timestamp = None
+            else:
+                raise Exception(f"Unknown control command: {command}.")
+        else:
+            raise Exception(f"Unknown message type: {msg_type}.")

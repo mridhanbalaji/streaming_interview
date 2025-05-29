@@ -1,5 +1,5 @@
-from . import weather
 import pytest
+from . import weather
 
 
 def test_sample_yields():
@@ -49,7 +49,7 @@ def test_snapshot_no_data():
         {"type": "control", "command": "snapshot"},
     ]
     output = list(weather.process_events(events))
-    assert output == []
+    assert not output
 
 def test_reset_with_data():
     events = [

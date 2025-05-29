@@ -17,8 +17,7 @@ def _process_sample(
     """
     station = line["stationName"]
     temp = line["temperature"]
-    ts = line["timestamp"]
-    # Update the latest timestamp
+    ts = line.get("timestamp")
     if ts is None:
         raise ValueError("Sample message missing 'timestamp'")
     latest_timestamp = ts
